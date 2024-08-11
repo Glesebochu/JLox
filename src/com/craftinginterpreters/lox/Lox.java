@@ -41,13 +41,40 @@ public class Lox {
     }
 
     private static void run(String source) {
+        // step 1: Lexical Analysis (Tokenization)
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
 
+        System.out.println("############### [Output] Lexical Analysis(Tokenization) #################");
         // For now, this just print the tokens.
         for (Token token : tokens) {
             System.out.println(token);
         }
+
+        System.out.println("############### [output] Parsing #################");
+        // Step 2: Parsing (Building the AST)
+        Parser parser = new Parser(tokens);
+        Expr expression = parser.parse();
+
+        // Step 3: Print the AST
+        if (expression != null) {
+            System.out.println(new ASTPrinter().print(expression));
+        }
+
+        // [output] Testcase1
+        // Expr exp = new Expr.Binary(
+        //     new Expr.Unary(
+        //         new Token(TokenType.MINUS, "-", null,1),
+        //         new Expr.Literal(123)
+        //     ),
+        //     new Token(TokenType.STAR, "*", null, 1),
+        //     new Expr.Grouping(
+        //         new Expr.Literal(45.67)
+        //     )
+        // );
+
+        // System.out.println("[output] Testcase1");
+        // System.out.println(new ASTPrinter().print(exp));
     }
 
     static void error(int line, String message) {
