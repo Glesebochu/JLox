@@ -6,6 +6,8 @@ import com.craftinginterpreters.lox.Interpreter;
 import com.craftinginterpreters.lox.Scanner;
 import com.craftinginterpreters.lox.Token;
 import java.util.List;
+import com.craftinginterpreters.lox.Stmt;
+
 
 import static org.junit.Assert.*;
 
@@ -27,10 +29,10 @@ public class ParserTest {
         List<Token> tokens = scanner.scanTokens();
         // Step 3: Parse the tokens into an AST
         Parser parser = new Parser(tokens);
-        Expr expression = parser.parse();
+        List<Stmt> statements = parser.parse();
         // Step 4: Evaluate the AST
         Interpreter interpreter = new Interpreter();
-        Object result = interpreter.evaluate(expression);
+     //   Object result = interpreter.evaluate(statements);
 
     }
 
