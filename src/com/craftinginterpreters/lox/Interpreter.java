@@ -46,10 +46,24 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public Object visitCallExpr(Expr.Call expr) {
         Object callee = evaluate(expr.callee);
         List<Object> arguments = new ArrayList<>();
+
         for (Expr argument : expr.arguments) {
             arguments.add(evaluate(argument));
         }
+
+        if (!(callee instanceof LoxCallable)) {
+            throw new RuntimeError(expr.paren,
+                    "Can only call functions and classes.");
+        }
+
         LoxCallable function = (LoxCallable) callee;
+
+        if (arguments.size() != function.arity()) {
+            throw new RuntimeError(expr.paren, "Expected " +
+                    function.arity() + " arguments but got " +
+                    arguments.size() + ".");
+        }
+
         return function.call(this, arguments);
     }
 
@@ -108,14 +122,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public Void visitExpressionStmt(Stmt.Expression stmt) {
         evaluate(stmt.expression);
         return null;
-    }
-
-    @Override
-    public Object visitCallExpr(Expr.Call expr) {
-        // Implement the logic for function calls here
-        // For now, you can leave this as a placeholder or throw an error if not
-        // implemented
-        throw new RuntimeError(expr.paren, "Function calls not implemented.");
     }
 
     @Override
