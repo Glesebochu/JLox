@@ -1,17 +1,16 @@
 package com.craftinginterpreters.lox;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     private Environment environment = new Environment();
 
-    
-    
     public Object evaluate(Expr expr) {
         return expr.accept(this);
     }
-    
+
     @Override
     public Object visitBinaryExpr(Expr.Binary expr) {
         Object left = evaluate(expr.left);
@@ -41,6 +40,17 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         }
 
         return null;
+    }
+
+    @Override
+    public Object visitCallExpr(Expr.Call expr) {
+        Object callee = evaluate(expr.callee);
+        List<Object> arguments = new ArrayList<>();
+        for (Expr argument : expr.arguments) {
+            arguments.add(evaluate(argument));
+        }
+        LoxCallable function = (LoxCallable) callee;
+        return function.call(this, arguments);
     }
 
     @Override
@@ -84,9 +94,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         Object left = evaluate(expr.left);
 
         if (expr.operator.type == TokenType.OR) {
-            if (isTruthy(left)) return left;
+            if (isTruthy(left))
+                return left;
         } else {
-            if (!isTruthy(left)) return left;
+            if (!isTruthy(left))
+                return left;
         }
 
         return evaluate(expr.right);
@@ -101,7 +113,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Object visitCallExpr(Expr.Call expr) {
         // Implement the logic for function calls here
-        // For now, you can leave this as a placeholder or throw an error if not implemented
+        // For now, you can leave this as a placeholder or throw an error if not
+        // implemented
         throw new RuntimeError(expr.paren, "Function calls not implemented.");
     }
 
@@ -132,7 +145,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         // Placeholder implementation
         throw new RuntimeError(expr.keyword, "'super' not implemented.");
     }
-
 
     @Override
     public Void visitPrintStmt(Stmt.Print stmt) {
@@ -177,7 +189,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     // Helper methods
-   
+
     public void interpret(List<Stmt> statements) {
         try {
             for (Stmt statement : statements) {
@@ -187,7 +199,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             Lox.runtimeError(error);
         }
     }
-//helper method
+
+    // helper method
     private void execute(Stmt stmt) {
         stmt.accept(this);
     }
@@ -206,13 +219,16 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     private boolean isTruthy(Object object) {
-        if (object == null) return false;
-        if (object instanceof Boolean) return (boolean) object;
+        if (object == null)
+            return false;
+        if (object instanceof Boolean)
+            return (boolean) object;
         return true;
     }
 
     private String stringify(Object object) {
-        if (object == null) return "nil";
+        if (object == null)
+            return "nil";
 
         // Java adds ".0" to integer-valued doubles, so we need to strip that off.
         if (object instanceof Double) {
@@ -227,34 +243,35 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 }
 
-
-/*public class Interpreter {
-
-    public Object evaluate(Expr expr) {
-        if (expr instanceof Expr.Binary) {
-            return evaluateBinaryExpr((Expr.Binary) expr);
-        } else if (expr instanceof Expr.Literal) {
-            return ((Expr.Literal) expr).value;
-        }
-        // Add more cases for other expression types
-        return null;
-    }
-
-    private Object evaluateBinaryExpr(Expr.Binary expr) {
-        Object left = evaluate(expr.left);
-        Object right = evaluate(expr.right);
-
-        switch (expr.operator.type) {
-            case PLUS:
-                return (double) left + (double) right;
-            case MINUS:
-                return (double) left - (double) right;
-            case STAR:
-                return (double) left * (double) right;
-            case SLASH:
-                return (double) left / (double) right;
-        }
-
-        return null;
-    }
-}*/
+/*
+ * public class Interpreter {
+ * 
+ * public Object evaluate(Expr expr) {
+ * if (expr instanceof Expr.Binary) {
+ * return evaluateBinaryExpr((Expr.Binary) expr);
+ * } else if (expr instanceof Expr.Literal) {
+ * return ((Expr.Literal) expr).value;
+ * }
+ * // Add more cases for other expression types
+ * return null;
+ * }
+ * 
+ * private Object evaluateBinaryExpr(Expr.Binary expr) {
+ * Object left = evaluate(expr.left);
+ * Object right = evaluate(expr.right);
+ * 
+ * switch (expr.operator.type) {
+ * case PLUS:
+ * return (double) left + (double) right;
+ * case MINUS:
+ * return (double) left - (double) right;
+ * case STAR:
+ * return (double) left * (double) right;
+ * case SLASH:
+ * return (double) left / (double) right;
+ * }
+ * 
+ * return null;
+ * }
+ * }
+ */
