@@ -146,6 +146,27 @@ public class Parser {
         return new Stmt.Expression(expr);
     }
 
+    private Stmt.Function function(String kind) {
+        Token name = consume(TokenType.IDENTIFIER, "Expect " + kind + " name.");
+        consume(TokenType.LEFT_PAREN, "Expect '(' after " + kind + " name.");
+
+        List<Token> parameters = new ArrayList<>();
+        if (!check(TokenType.RIGHT_PAREN)) {
+            do {
+                if (parameters.size() >= 255) {
+                    error(peek(), "Cannot have more than 255 parameters.");
+                }
+                parameters.add(consume(TokenType.IDENTIFIER, "Expect parameter name."));
+            } while (match(TokenType.COMMA));
+        }
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
+
+        consume(TokenType.LEFT_BRACE, "Expect '{' before " + kind + " body.");
+        List<Stmt> body = block();
+
+        return new Stmt.Function(name, parameters, body);
+    }
+
     private List<Stmt> block() {
         List<Stmt> statements = new ArrayList<>();
 
@@ -265,7 +286,7 @@ public class Parser {
     private Expr call() {
         Expr expr = primary();
         while (true) {
-            if (match(LEFT_PAREN)) {
+            if (match(TokenType.LEFT_PAREN)) {
                 expr = finishCall(expr);
             } else {
                 break;
@@ -276,16 +297,16 @@ public class Parser {
 
     private Expr finishCall(Expr callee) {
         List<Expr> arguments = new ArrayList<>();
-        if (!check(RIGHT_PAREN)) {
+        if (!check(TokenType.RIGHT_PAREN)) {
             do {
                 if (arguments.size() >= 255) {
                     error(peek(),
                             "Can't have more than 255 arguments.");
                 }
                 arguments.add(expression());
-            } while (match(COMMA));
+            } while (match(TokenType.COMMA));
         }
-        Token paren = consume(RIGHT_PAREN,
+        Token paren = consume(TokenType.RIGHT_PAREN,
                 "Expect ')' after arguments.");
         return new Expr.Call(callee, paren, arguments);
     }
@@ -358,27 +379,6 @@ public class Parser {
     private ParseError error(Token token, String message) {
         Lox.error(token.line, message);
         return new ParseError();
-    }
-
-    private Stmt.Function function(String kind) {
-        Token name = consume(TokenType.IDENTIFIER, "Expect " + kind + " name.");
-        consume(TokenType.LEFT_PAREN, "Expect '(' after " + kind + " name.");
-
-        List<Token> parameters = new ArrayList<>();
-        if (!check(TokenType.RIGHT_PAREN)) {
-            do {
-                if (parameters.size() >= 255) {
-                    error(peek(), "Cannot have more than 255 parameters.");
-                }
-                parameters.add(consume(TokenType.IDENTIFIER, "Expect parameter name."));
-            } while (match(TokenType.COMMA));
-        }
-        consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
-
-        consume(TokenType.LEFT_BRACE, "Expect '{' before " + kind + " body.");
-        List<Stmt> body = block();
-
-        return new Stmt.Function(name, parameters, body);
     }
 
     private void synchronize() {
