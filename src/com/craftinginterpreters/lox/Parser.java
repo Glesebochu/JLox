@@ -11,7 +11,6 @@ public class Parser {
         this.tokens = tokens;
     }
 
-
     public List<Stmt> parse() {
         List<Stmt> statements = new ArrayList<>();
         while (!isAtEnd()) {
@@ -20,20 +19,23 @@ public class Parser {
         return statements;
     }
 
-    /*Method for parsing a single expression (returns an Expr)
-    public Expr parseExpression() {
-        try {
-            return expression();
-        } catch (ParseError error) {
-            return null;
-        }
-    }*/
-
-    
+    /*
+     * Method for parsing a single expression (returns an Expr)
+     * public Expr parseExpression() {
+     * try {
+     * return expression();
+     * } catch (ParseError error) {
+     * return null;
+     * }
+     * }
+     */
 
     private Stmt declaration() {
         try {
-            if (match(TokenType.VAR)) return varDeclaration();
+            if (match(TokenType.FUN))
+                return function("function");
+            if (match(TokenType.VAR))
+                return varDeclaration();
             return statement();
         } catch (ParseError error) {
             synchronize();
@@ -54,11 +56,16 @@ public class Parser {
     }
 
     private Stmt statement() {
-        if (match(TokenType.FOR)) return forStatement();
-        if (match(TokenType.IF)) return ifStatement();
-        if (match(TokenType.PRINT)) return printStatement();
-        if (match(TokenType.WHILE)) return whileStatement();
-        if (match(TokenType.LEFT_BRACE)) return new Stmt.Block(block());
+        if (match(TokenType.FOR))
+            return forStatement();
+        if (match(TokenType.IF))
+            return ifStatement();
+        if (match(TokenType.PRINT))
+            return printStatement();
+        if (match(TokenType.WHILE))
+            return whileStatement();
+        if (match(TokenType.LEFT_BRACE))
+            return new Stmt.Block(block());
 
         return expressionStatement();
     }
@@ -93,7 +100,8 @@ public class Parser {
             body = new Stmt.Block(List.of(body, new Stmt.Expression(increment)));
         }
 
-        if (condition == null) condition = new Expr.Literal(true);
+        if (condition == null)
+            condition = new Expr.Literal(true);
         body = new Stmt.While(condition, body);
 
         if (initializer != null) {
@@ -161,7 +169,7 @@ public class Parser {
             Expr value = assignment();
 
             if (expr instanceof Expr.Variable) {
-                Token name = ((Expr.Variable)expr).name;
+                Token name = ((Expr.Variable) expr).name;
                 return new Expr.Assign(name, value);
             }
 
@@ -211,7 +219,7 @@ public class Parser {
         Expr expr = term();
 
         while (match(TokenType.GREATER, TokenType.GREATER_EQUAL,
-                     TokenType.LESS, TokenType.LESS_EQUAL)) {
+                TokenType.LESS, TokenType.LESS_EQUAL)) {
             Token operator = previous();
             Expr right = term();
             expr = new Expr.Binary(expr, operator, right);
@@ -255,9 +263,12 @@ public class Parser {
     }
 
     private Expr primary() {
-        if (match(TokenType.FALSE)) return new Expr.Literal(false);
-        if (match(TokenType.TRUE)) return new Expr.Literal(true);
-        if (match(TokenType.NIL)) return new Expr.Literal(null);
+        if (match(TokenType.FALSE))
+            return new Expr.Literal(false);
+        if (match(TokenType.TRUE))
+            return new Expr.Literal(true);
+        if (match(TokenType.NIL))
+            return new Expr.Literal(null);
 
         if (match(TokenType.NUMBER, TokenType.STRING)) {
             return new Expr.Literal(previous().literal);
@@ -287,228 +298,59 @@ public class Parser {
     }
 
     private boolean check(TokenType type) {
-        if (isAtEnd()) return false;
-        return peek().type == type;
-    }
-
-    private Token advance() {
-        if (!isAtEnd()) current++;
-        return previous();
-    }
-
-    private boolean isAtEnd() {
-        return peek().type == TokenType.EOF;
-    }
-
-    private Token peek() {
-        return tokens.get(current);
-    }
-
-    private Token previous() {
-        return tokens.get(current - 1);
-    }
-
-    private Token consume(TokenType type, String message) {
-        if (check(type)) return advance();
-        throw error(peek(), message);
-    }
-
-    private ParseError error(Token token, String message) {
-        Lox.error(token.line, message);
-        return new ParseError();
-    }
-
-    private void synchronize() {
-        advance();
-
-        while (!isAtEnd()) {
-            if (previous().type == TokenType.SEMICOLON) return;
-
-            switch (peek().type) {
-                case CLASS:
-                case FUN:
-                case VAR:
-                case FOR:
-                case IF:
-                case WHILE:
-                case PRINT:
-                case RETURN:
-                    return;
-            }
-
-            advance();
-        }
-    }
-
-    private static class ParseError extends RuntimeException {}
-}
-
-
-
-
-/*package com.craftinginterpreters.lox;
-
-import java.util.List;
-
-public class Parser {
-    private final List<Token> tokens;
-    private int current = 0;
-
-    public Parser(List<Token> tokens) {
-        this.tokens = tokens;
-    }
-
-    public Expr parse() {
-        try {
-            return expression();
-        } catch (ParseError error) {
-            return null;
-        }
-    }
-
-    // The expression() method is where parsing begins, and it calls equality() to
-    // start the chain of parsing down to primary expressions.
-    private Expr expression() {
-        return equality();
-    }
-
-    // The parsing methods follow the grammar rules of the language.
-    // Handles equality checks and uses Binary AST nodes.
-    private Expr equality() {
-        Expr expr = comparison();
-
-        while (match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)) {
-            Token operator = previous();
-            Expr right = comparison();
-            expr = new Expr.Binary(expr, operator, right);
-        }
-
-        return expr;
-    }
-
-    // This method handles addition and subtraction (+, -)
-    private Expr comparison() {
-        Expr expr = term();
-
-        while (match(TokenType.GREATER, TokenType.GREATER_EQUAL,
-                TokenType.LESS, TokenType.LESS_EQUAL)) {
-            Token operator = previous();
-            Expr right = term();
-            expr = new Expr.Binary(expr, operator, right);
-        }
-
-        return expr;
-    }
-
-    private Expr term() {
-        Expr expr = factor();
-
-        while (match(TokenType.MINUS, TokenType.PLUS)) {
-            Token operator = previous();
-            Expr right = factor();
-            expr = new Expr.Binary(expr, operator, right);
-        }
-
-        return expr;
-    }
-
-    // If the current token is a unary operator (! or -), it creates a Unary AST
-    // node.
-    private Expr factor() {
-        Expr expr = unary();
-
-        while (match(TokenType.SLASH, TokenType.STAR)) {
-            Token operator = previous();
-            Expr right = unary();
-            expr = new Expr.Binary(expr, operator, right);
-        }
-
-        return expr;
-    }
-
-    // node and parses the next expression as its operand.
-    private Expr unary() {
-        if (match(TokenType.BANG, TokenType.MINUS)) {
-            Token operator = previous();
-            Expr right = unary();
-            return new Expr.Unary(operator, right);
-        }
-
-        return primary();
-    }
-
-    // This method handles basic expressions like false, true, nil, numbers,
-    // strings, and expressions in parentheses.
-    // If the current token doesn’t match any of these, it throws an error.
-    private Expr primary() {
-        if (match(TokenType.FALSE))
-            return new Expr.Literal(false);
-        if (match(TokenType.TRUE))
-            return new Expr.Literal(true);
-        if (match(TokenType.NIL))
-            return new Expr.Literal(null);
-
-        if (match(TokenType.NUMBER, TokenType.STRING)) {
-            return new Expr.Literal(previous().literal);
-        }
-
-        if (match(TokenType.LEFT_PAREN)) {
-            Expr expr = expression();
-            consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
-            return new Expr.Grouping(expr);
-        }
-
-        throw error(peek(), "Expect expression.");
-    }
-
-    // Utility methods for parsing
-    // To check and move to the next token if it matches
-    private boolean match(TokenType... types) {
-        for (TokenType type : types) {
-            if (check(type)) {
-                advance();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean check(TokenType type) {
         if (isAtEnd())
             return false;
         return peek().type == type;
-    }
-
-    private boolean isAtEnd() {
-        return peek().type == TokenType.EOF;
-    }
-
-    private Token peek() {
-        return tokens.get(current);
-    }
-
-    private Token previous() {
-        return tokens.get(current - 1);
-    }
-
-    // This method checks if the current token is of a specific type
-    private Token consume(TokenType type, String message) {
-        if (check(type))
-            return advance();
-        throw error(peek(), message);
-    }
-
-    // Error handling
-    // This method reports an error when something goes wrong with parsing.
-    private ParseError error(Token token, String message) {
-        Lox.error(token.line, message);
-        return new ParseError();
     }
 
     private Token advance() {
         if (!isAtEnd())
             current++;
         return previous();
+    }
+
+    private boolean isAtEnd() {
+        return peek().type == TokenType.EOF;
+    }
+
+    private Token peek() {
+        return tokens.get(current);
+    }
+
+    private Token previous() {
+        return tokens.get(current - 1);
+    }
+
+    private Token consume(TokenType type, String message) {
+        if (check(type))
+            return advance();
+        throw error(peek(), message);
+    }
+
+    private ParseError error(Token token, String message) {
+        Lox.error(token.line, message);
+        return new ParseError();
+    }
+
+    private Stmt.Function function(String kind) {
+        Token name = consume(TokenType.IDENTIFIER, "Expect " + kind + " name.");
+        consume(TokenType.LEFT_PAREN, "Expect '(' after " + kind + " name.");
+
+        List<Token> parameters = new ArrayList<>();
+        if (!check(TokenType.RIGHT_PAREN)) {
+            do {
+                if (parameters.size() >= 255) {
+                    error(peek(), "Cannot have more than 255 parameters.");
+                }
+                parameters.add(consume(TokenType.IDENTIFIER, "Expect parameter name."));
+            } while (match(TokenType.COMMA));
+        }
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
+
+        consume(TokenType.LEFT_BRACE, "Expect '{' before " + kind + " body.");
+        List<Stmt> body = block();
+
+        return new Stmt.Function(name, parameters, body);
     }
 
     private void synchronize() {
@@ -533,8 +375,203 @@ public class Parser {
             advance();
         }
     }
-    // Moves the parser to the next token in the stream.
 
     private static class ParseError extends RuntimeException {
     }
-}*/
+}
+
+/*
+ * package com.craftinginterpreters.lox;
+ * 
+ * import java.util.List;
+ * 
+ * public class Parser {
+ * private final List<Token> tokens;
+ * private int current = 0;
+ * 
+ * public Parser(List<Token> tokens) {
+ * this.tokens = tokens;
+ * }
+ * 
+ * public Expr parse() {
+ * try {
+ * return expression();
+ * } catch (ParseError error) {
+ * return null;
+ * }
+ * }
+ * 
+ * // The expression() method is where parsing begins, and it calls equality()
+ * to
+ * // start the chain of parsing down to primary expressions.
+ * private Expr expression() {
+ * return equality();
+ * }
+ * 
+ * // The parsing methods follow the grammar rules of the language.
+ * // Handles equality checks and uses Binary AST nodes.
+ * private Expr equality() {
+ * Expr expr = comparison();
+ * 
+ * while (match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)) {
+ * Token operator = previous();
+ * Expr right = comparison();
+ * expr = new Expr.Binary(expr, operator, right);
+ * }
+ * 
+ * return expr;
+ * }
+ * 
+ * // This method handles addition and subtraction (+, -)
+ * private Expr comparison() {
+ * Expr expr = term();
+ * 
+ * while (match(TokenType.GREATER, TokenType.GREATER_EQUAL,
+ * TokenType.LESS, TokenType.LESS_EQUAL)) {
+ * Token operator = previous();
+ * Expr right = term();
+ * expr = new Expr.Binary(expr, operator, right);
+ * }
+ * 
+ * return expr;
+ * }
+ * 
+ * private Expr term() {
+ * Expr expr = factor();
+ * 
+ * while (match(TokenType.MINUS, TokenType.PLUS)) {
+ * Token operator = previous();
+ * Expr right = factor();
+ * expr = new Expr.Binary(expr, operator, right);
+ * }
+ * 
+ * return expr;
+ * }
+ * 
+ * // If the current token is a unary operator (! or -), it creates a Unary AST
+ * // node.
+ * private Expr factor() {
+ * Expr expr = unary();
+ * 
+ * while (match(TokenType.SLASH, TokenType.STAR)) {
+ * Token operator = previous();
+ * Expr right = unary();
+ * expr = new Expr.Binary(expr, operator, right);
+ * }
+ * 
+ * return expr;
+ * }
+ * 
+ * // node and parses the next expression as its operand.
+ * private Expr unary() {
+ * if (match(TokenType.BANG, TokenType.MINUS)) {
+ * Token operator = previous();
+ * Expr right = unary();
+ * return new Expr.Unary(operator, right);
+ * }
+ * 
+ * return primary();
+ * }
+ * 
+ * // This method handles basic expressions like false, true, nil, numbers,
+ * // strings, and expressions in parentheses.
+ * // If the current token doesn’t match any of these, it throws an error.
+ * private Expr primary() {
+ * if (match(TokenType.FALSE))
+ * return new Expr.Literal(false);
+ * if (match(TokenType.TRUE))
+ * return new Expr.Literal(true);
+ * if (match(TokenType.NIL))
+ * return new Expr.Literal(null);
+ * 
+ * if (match(TokenType.NUMBER, TokenType.STRING)) {
+ * return new Expr.Literal(previous().literal);
+ * }
+ * 
+ * if (match(TokenType.LEFT_PAREN)) {
+ * Expr expr = expression();
+ * consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
+ * return new Expr.Grouping(expr);
+ * }
+ * 
+ * throw error(peek(), "Expect expression.");
+ * }
+ * 
+ * // Utility methods for parsing
+ * // To check and move to the next token if it matches
+ * private boolean match(TokenType... types) {
+ * for (TokenType type : types) {
+ * if (check(type)) {
+ * advance();
+ * return true;
+ * }
+ * }
+ * return false;
+ * }
+ * 
+ * private boolean check(TokenType type) {
+ * if (isAtEnd())
+ * return false;
+ * return peek().type == type;
+ * }
+ * 
+ * private boolean isAtEnd() {
+ * return peek().type == TokenType.EOF;
+ * }
+ * 
+ * private Token peek() {
+ * return tokens.get(current);
+ * }
+ * 
+ * private Token previous() {
+ * return tokens.get(current - 1);
+ * }
+ * 
+ * // This method checks if the current token is of a specific type
+ * private Token consume(TokenType type, String message) {
+ * if (check(type))
+ * return advance();
+ * throw error(peek(), message);
+ * }
+ * 
+ * // Error handling
+ * // This method reports an error when something goes wrong with parsing.
+ * private ParseError error(Token token, String message) {
+ * Lox.error(token.line, message);
+ * return new ParseError();
+ * }
+ * 
+ * private Token advance() {
+ * if (!isAtEnd())
+ * current++;
+ * return previous();
+ * }
+ * 
+ * private void synchronize() {
+ * advance();
+ * 
+ * while (!isAtEnd()) {
+ * if (previous().type == TokenType.SEMICOLON)
+ * return;
+ * 
+ * switch (peek().type) {
+ * case CLASS:
+ * case FUN:
+ * case VAR:
+ * case FOR:
+ * case IF:
+ * case WHILE:
+ * case PRINT:
+ * case RETURN:
+ * return;
+ * }
+ * 
+ * advance();
+ * }
+ * }
+ * // Moves the parser to the next token in the stream.
+ * 
+ * private static class ParseError extends RuntimeException {
+ * }
+ * }
+ */
