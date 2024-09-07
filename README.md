@@ -99,7 +99,7 @@ Here are a few ways to contribute:
 
 1. Zelalem Amare (NV3369)
 2. Abenezer Walelign (TG3042)
-3. Intisar Mohammed (EK9824)
+3. Intisar Anwar (EK9824)
 4. Yanet Abrham (PM9785)
 
 ---
