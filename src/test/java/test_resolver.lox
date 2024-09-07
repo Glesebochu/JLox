@@ -1,0 +1,63 @@
+// Global variable declaration
+var global = "global value";
+print global; // Expected: "global value"
+
+fun outerFunction() {
+  // Local variable in outer function
+  var outerVar = "outer value";
+
+  // Inner function (closure)
+  fun innerFunction() {
+    // Accessing a variable from the outer function's scope
+    print outerVar; // Expected: "outer value"
+
+    // Modifying the outer scope variable
+    outerVar = "outer value modified";
+    print outerVar; // Expected: "outer value modified"
+  }
+
+  print "Before calling innerFunction";
+  innerFunction();
+  print "After calling innerFunction, outerVar is: " + outerVar;
+  // Expected: "After calling innerFunction, outerVar is: outer value modified"
+}
+
+outerFunction();
+
+// Block scoping
+{
+  var blockScoped = "inside block";
+  print blockScoped; // Expected: "inside block"
+}
+
+// Error: blockScoped should not be accessible here (outside block)
+// Uncomment this line to test if your resolver correctly catches this error
+// print blockScoped;
+
+fun testParameters(a, b) {
+  print "a: " + a; // Expected: "a: param1"
+  print "b: " + b; // Expected: "b: param2"
+}
+
+testParameters("param1", "param2");
+
+// Closure test with multiple layers of nested functions
+fun makeCounter() {
+  var count = 0;
+  
+  fun increment() {
+    count = count + 1;
+    print count;
+  }
+  
+  return increment;
+}
+
+var counter = makeCounter();
+counter(); // Expected: 1
+counter(); // Expected: 2
+counter(); // Expected: 3
+
+// Error Handling: Uncomment these to test error reporting
+var duplicateVar = "first declaration";
+var duplicateVar = "second declaration"; // Expected error: variable already declared in scope
