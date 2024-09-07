@@ -1,0 +1,85 @@
+print "========================================================";
+print "Test 1: Check Parameters";
+fun greet(name) {
+  print "Hello, " + name;
+}
+
+greet("My guy");
+greet("Broski");
+
+print "";
+print "========================================================";
+print "Test 2: Check return value";
+fun add(a, b){
+  return a + b;
+}
+
+print add(2, 4);
+
+print "";
+print "========================================================";
+print "Test 3: Implicit Return Value (nil)";
+fun noReturn() {
+  print "This function has no return statement.";
+}
+print noReturn(); // Expected output: "This function has no return statement." followed by "nil"
+
+print "";
+print "========================================================";
+print "Test 4: Function Scope and Local Variables";
+fun scopeTest() {
+  var x = "outer";
+  {
+    var x = "inner";
+    print "Expecting inner = " + x; // Expected output: "inner"
+  }
+  print "Expecting outer = " + x;   // Expected output: "outer"
+}
+
+scopeTest();
+
+print "";
+print "========================================================";
+print "Test 5: Recursive Functions";
+fun countdown(n) {
+  if (n > 0) {
+    print n;
+    countdown(n - 1);
+  } else {
+    print "Blastoff!";
+  }
+}
+
+countdown(3);
+
+print "";
+print "========================================================";
+print "Test 6: Closures";
+fun makeCounter() {
+  var count = 0;
+  fun increment() {
+    count = count + 1;
+    return count;
+  }
+
+  return increment;
+}
+
+var counter = makeCounter();
+print counter(); // Expected output: 1
+print counter(); // Expected output: 2
+print counter(); // Expected output: 3
+
+print "";
+print "========================================================";
+print "Test 7: Multiple Function Calls & Nesting";
+fun multiply(a, b) {
+  return a * b;
+}
+
+fun printResult() {
+  var result = multiply(3, 4);
+  print "Expecting 12.0 = " + result; // Expected output: 12
+}
+
+printResult(); // Calling a function that calls another function
