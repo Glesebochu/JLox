@@ -1,3 +1,6 @@
+
+![JLox2](https://github.com/user-attachments/assets/65a5db2d-401c-4b71-8b3a-bc59fb8ee95b)
+
 ## JLox - A Tree-Walk Interpreter for the Lox Programming Language
 
 **JLox** is a tree-walk interpreter for the Lox programming language, implemented in Java. This project is based on the book *Crafting Interpreters* by Robert Nystrom and follows the development of the Lox interpreter step-by-step.
