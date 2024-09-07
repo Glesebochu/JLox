@@ -49,7 +49,19 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
         switch (expr.operator.type) {
             case PLUS:
-                return (double) left + (double) right;
+                // Check if both operands are numbers
+                if (left instanceof Double && right instanceof Double) {
+                    return (double) left + (double) right;
+                }
+
+                // Check if either operand is a string, perform string concatenation
+                if (left instanceof String || right instanceof String) {
+                    return String.valueOf(left) + String.valueOf(right);
+                }
+
+                // Throw error if neither numbers nor strings
+                throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
+
             case MINUS:
                 return (double) left - (double) right;
             case STAR:
