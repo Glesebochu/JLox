@@ -92,6 +92,15 @@ Here are a few ways to contribute:
 
 ---
 
+### The Team
+
+1. Zelalem Amare (NV3369)
+2. Abenezer Walelign (TG3042)
+3. Intisar Mohammed (EK9824)
+4. Yanet Abrham (PM9785)
+
+---
+
 ### Acknowledgments:
 
 JLox is based on *Crafting Interpreters* by Robert Nystrom, an invaluable resource for anyone interested in building interpreters or compilers from scratch. Check out the book for a more detailed explanation of how JLox works under the hood.
