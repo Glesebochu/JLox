@@ -11,11 +11,11 @@ fun outerFunction() {
 
   // Inner function (closure)
   fun innerFunction() {
-    print "Inside innerFunction: Accessing 'outerVar' from outer scope, which is: " + outerVar;
-    
-    // Modifying the outer scope variable
-    outerVar = "outer value modified";
-    print "Inside innerFunction: 'outerVar' modified to: " + outerVar;
+	print "Inside innerFunction: Accessing 'outerVar' from outer scope, which is: " + outerVar;
+	
+	// Modifying the outer scope variable
+	outerVar = "outer value modified";
+	print "Inside innerFunction: 'outerVar' modified to: " + outerVar;
   }
 
   print "Before calling innerFunction, 'outerVar' is: " + outerVar;
@@ -53,10 +53,10 @@ fun makeCounter() {
   var count = 0;
   
   fun increment() {
-    print "Inside increment: Incrementing 'count'.";
-    count = count + 1;
-    print "Inside increment: 'count' is now: " + count;
-    return count;
+	print "Inside increment: Incrementing 'count'.";
+	count = count + 1;
+	print "Inside increment: 'count' is now: " + count;
+	return count;
   }
   
   print "makeCounter returns the 'increment' function.";
@@ -75,10 +75,12 @@ counter(); // Expected: 3
 
 print "";
 print "=== Error Handling: Testing redeclaration error ===";
-// Uncomment these lines to test the redeclaration error handling
-// print "Attempting to redeclare a variable in the same scope.";
-// var duplicateVar = "first declaration";
-// var duplicateVar = "second declaration"; // Expected error: variable already declared in scope
+//Uncomment these lines to test the redeclaration error handling
+// {
+//     print "Attempting to redeclare a variable in the same scope.";
+//     var duplicateVar = "first declaration";
+//     var duplicateVar = "second declaration"; // Expected error: variable already declared in scope
+// }
 
 print "";
 print "All tests completed.";
