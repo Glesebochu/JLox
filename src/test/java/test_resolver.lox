@@ -1,63 +1,84 @@
-// Global variable declaration
+// Testing global variable declaration and access
+print "=== Global Variable Test ===";
 var global = "global value";
-print global; // Expected: "global value"
+print "Global variable 'global' is: " + global; // Expected: "global value"
 
+print "";
+print "=== Function Scoping Test ===";
 fun outerFunction() {
-  // Local variable in outer function
+  print "Inside outerFunction: Declaring local variable 'outerVar'.";
   var outerVar = "outer value";
 
   // Inner function (closure)
   fun innerFunction() {
-    // Accessing a variable from the outer function's scope
-    print outerVar; // Expected: "outer value"
-
+    print "Inside innerFunction: Accessing 'outerVar' from outer scope, which is: " + outerVar;
+    
     // Modifying the outer scope variable
     outerVar = "outer value modified";
-    print outerVar; // Expected: "outer value modified"
+    print "Inside innerFunction: 'outerVar' modified to: " + outerVar;
   }
 
-  print "Before calling innerFunction";
+  print "Before calling innerFunction, 'outerVar' is: " + outerVar;
   innerFunction();
-  print "After calling innerFunction, outerVar is: " + outerVar;
-  // Expected: "After calling innerFunction, outerVar is: outer value modified"
+  print "After calling innerFunction, 'outerVar' is: " + outerVar;
 }
 
 outerFunction();
 
-// Block scoping
+print "";
+print "=== Block Scoping Test ===";
 {
+  print "Inside block: Declaring block-scoped variable 'blockScoped'.";
   var blockScoped = "inside block";
-  print blockScoped; // Expected: "inside block"
+  print "Inside block: 'blockScoped' is: " + blockScoped; // Expected: "inside block"
 }
 
-// Error: blockScoped should not be accessible here (outside block)
-// Uncomment this line to test if your resolver correctly catches this error
-// print blockScoped;
+print "Trying to access 'blockScoped' outside of block (should cause an error).";
+// Uncomment the following line to test the resolver catching the error
+// print blockScoped; // Error: 'blockScoped' should not be accessible outside the block
 
+print "";
+print "=== Function Parameter Resolution Test ===";
 fun testParameters(a, b) {
-  print "a: " + a; // Expected: "a: param1"
-  print "b: " + b; // Expected: "b: param2"
+  print "Inside testParameters: 'a' is: " + a; // Expected: "param1"
+  print "Inside testParameters: 'b' is: " + b; // Expected: "param2"
 }
 
 testParameters("param1", "param2");
 
-// Closure test with multiple layers of nested functions
+print "";
+print "=== Closure Test: Function capturing variables from outer scope ===";
 fun makeCounter() {
+  print "Inside makeCounter: Declaring local variable 'count' initialized to 0.";
   var count = 0;
   
   fun increment() {
+    print "Inside increment: Incrementing 'count'.";
     count = count + 1;
-    print count;
+    print "Inside increment: 'count' is now: " + count;
+    return count;
   }
   
+  print "makeCounter returns the 'increment' function.";
   return increment;
 }
 
+print "Creating a counter using 'makeCounter'.";
 var counter = makeCounter();
+
+print "Calling counter() the first time.";
 counter(); // Expected: 1
+print "Calling counter() the second time.";
 counter(); // Expected: 2
+print "Calling counter() the third time.";
 counter(); // Expected: 3
 
-// Error Handling: Uncomment these to test error reporting
-var duplicateVar = "first declaration";
-var duplicateVar = "second declaration"; // Expected error: variable already declared in scope
+print "";
+print "=== Error Handling: Testing redeclaration error ===";
+// Uncomment these lines to test the redeclaration error handling
+// print "Attempting to redeclare a variable in the same scope.";
+// var duplicateVar = "first declaration";
+// var duplicateVar = "second declaration"; // Expected error: variable already declared in scope
+
+print "";
+print "All tests completed.";
